@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TenderAI - Intelligent Tender PDF Analysis & 63-Point Checklist Portal</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563EB'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpolyline points='14 2 14 8 20 8' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='m9 15 2 2 4-4' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="light-theme">
+  <!-- App Container -->
+  <div id="app" class="app-layout">
+
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-logo">
+          <div class="logo-icon">
+            <i data-lucide="file-check-2"></i>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">Tender<span class="highlight">AI</span></span>
+            <span class="brand-tag">Intelligent Audit Engine</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs">
+        <button class="nav-btn active" data-tab="folders-tab">
+          <i data-lucide="folder-kanban"></i>
+          <span>Tender Folders</span>
+          <span class="badge" id="nav-folder-count">0</span>
+        </button>
+        <button class="nav-btn" data-tab="criteria-tab">
+          <i data-lucide="list-checks"></i>
+          <span>Checklist Points</span>
+          <span class="badge" id="nav-criteria-count">63</span>
+        </button>
+        <button class="nav-btn" data-tab="analysis-tab" id="nav-analysis-btn">
+          <i data-lucide="sparkles"></i>
+          <span>Live Analysis</span>
+        </button>
+        <button class="nav-btn" data-tab="history-tab">
+          <i data-lucide="history"></i>
+          <span>History Archive</span>
+          <span class="badge" id="nav-history-count">0</span>
+        </button>
+      </nav>
+
+      <div class="header-right">
+        <button class="icon-action-btn" id="btn-open-settings" title="API Keys & Settings">
+          <i data-lucide="settings"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="main-content">
+
+      <!-- ================= 1. FOLDERS & UPLOAD TAB ================= -->
+      <section id="folders-tab" class="tab-panel active">
+        <!-- Folders View (Grid of Folders) -->
+        <div id="folders-grid-view">
+          <div class="section-topbar">
+            <div>
+              <h1 class="page-title">Tender Workspaces & Folders</h1>
+              <p class="page-subtitle">Create a folder for each tender project and upload all tender documents for isolated AI analysis.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-create-folder-modal">
+              <i data-lucide="folder-plus"></i>
+              <span>Create New Folder</span>
+            </button>
+          </div>
+
+          <!-- Quick Stats Cards -->
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-icon blue"><i data-lucide="folder"></i></div>
+              <div class="stat-info">
+                <span class="stat-num" id="stat-total-folders">0</span>
+                <span class="stat-label">Active Folders</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i data-lucide="check-circle-2"></i></div>
+              <div class="stat-info">
+                <span class="stat-num" id="stat-active-points">63</span>
+                <span class="stat-label">Checklist Points Ready</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Folders Container -->
+          <div id="folders-container" class="folders-grid">
+            <!-- Dynamically populated folder cards -->
+          </div>
+
+          <!-- Empty State for Folders -->
+          <div id="folders-empty-state" class="empty-state">
+            <div class="empty-icon"><i data-lucide="folder-open"></i></div>
+            <h3>No Tender Folders Created Yet</h3>
+            <p>Click "Create First Folder" to start organizing your tender PDFs.</p>
+            <button class="btn btn-primary btn-lg mt-3" id="btn-create-folder-empty">
+              <i data-lucide="folder-plus"></i>
+              <span>Create First Folder</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Single Folder Inside View -->
+        <div id="folder-inside-view" class="hidden">
+          <div class="folder-header-nav">
+            <button class="btn btn-ghost" id="btn-back-to-folders">
+              <i data-lucide="arrow-left"></i>
+              <span>Back to All Folders</span>
+            </button>
+            <div class="folder-actions-right">
+              <button class="btn btn-danger-ghost" id="btn-delete-current-folder">
+                <i data-lucide="trash-2"></i>
+                <span>Delete Folder</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="folder-meta-card">
+            <div class="folder-meta-main">
+              <div class="folder-badge-icon"><i data-lucide="folder"></i></div>
+              <div>
+                <h2 class="folder-current-name" id="current-folder-name">Tender Name</h2>
+                <p class="folder-current-desc" id="current-folder-desc">Department / Description</p>
+                <div class="folder-meta-chips">
+                  <span class="meta-chip"><i data-lucide="calendar"></i> Created: <span id="current-folder-date">-</span></span>
+                  <span class="meta-chip"><i data-lucide="file-text"></i> <span id="current-folder-pdf-count">0</span> PDFs Uploaded</span>
+                  <span class="meta-chip highlight"><i data-lucide="shield-check"></i> Isolated Scope</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="folder-analyze-action">
+              <button class="btn btn-emerald btn-lg pulse-glow" id="btn-start-folder-analysis">
+                <i data-lucide="sparkles"></i>
+                <span>Analyze Tender Documents</span>
+                <span class="sub-badge" id="folder-action-points-badge">100 Points</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Upload Dropzone -->
+          <div class="dropzone-card" id="pdf-dropzone">
+            <input type="file" id="pdf-file-input" multiple accept=".pdf" class="file-input-hidden" />
+            <div class="dropzone-content">
+              <div class="drop-icon"><i data-lucide="upload-cloud"></i></div>
+              <h3>Drag & Drop Tender PDF Documents Here</h3>
+              <p>Upload NIT, Technical Specifications, BOQ, GCC/SCC, Corrigendums (Multiple PDFs supported &bull; <strong style="color:var(--cyan);">Max 60 MB per file</strong>)</p>
+              <button class="btn btn-secondary mt-2" type="button" id="btn-browse-files">
+                <i data-lucide="plus-circle"></i>
+                <span>Browse PDF Files</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Uploaded Files List -->
+          <div class="card files-list-card mt-4">
+            <div class="card-header">
+              <div class="card-title-group">
+                <i data-lucide="files"></i>
+                <h3>Uploaded Tender Documents (<span id="files-list-count">0</span>)</h3>
+              </div>
+              <span class="text-muted text-sm">AI analysis will process all documents listed below</span>
+            </div>
+            <div class="card-body p-0">
+              <div id="uploaded-files-table-container">
+                <table class="data-table" id="uploaded-files-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">#</th>
+                      <th>Document Name</th>
+                      <th>Size</th>
+                      <th>Status</th>
+                      <th style="width: 90px; text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="uploaded-files-tbody">
+                    <!-- Dynamic file rows -->
+                  </tbody>
+                </table>
+              </div>
+              <div id="no-files-in-folder" class="empty-files-hint">
+                <i data-lucide="file-warning"></i>
+                <p>No PDF documents uploaded yet. Upload PDFs above to enable analysis.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. 63-POINTS CHECKLIST MANAGER TAB ================= -->
+      <section id="criteria-tab" class="tab-panel">
+        <div class="section-topbar">
+          <div>
+            <h1 class="page-title">Tender Analysis Checklist (63 Points)</h1>
+            <p class="page-subtitle">Configured with your exact 63 tender criteria points. You can add more custom points anytime, edit questions, toggle points ON/OFF, or bulk import.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="btn btn-ghost" id="btn-reset-default-criteria" title="Reset to standard 63 points">
+              <i data-lucide="rotate-ccw"></i>
+              <span>Reset 63 Points</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-open-bulk-import">
+              <i data-lucide="file-input"></i>
+              <span>Bulk Paste Points</span>
+            </button>
+            <button class="btn btn-primary" id="btn-open-add-criterion">
+              <i data-lucide="plus"></i>
+              <span>Add Custom Point</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="filter-search-card">
+          <div class="search-box">
+            <i data-lucide="search"></i>
+            <input type="text" id="criteria-search-input" placeholder="Search questions, categories, keywords (e.g. EMD, Turnover, LD, Penalty, BG)..." />
+            <button id="criteria-search-clear" class="search-clear hidden"><i data-lucide="x"></i></button>
+          </div>
+          <div class="category-pills-bar" id="category-pills">
+            <!-- Dynamic Category Pills -->
+          </div>
+        </div>
+
+        <!-- Checklist Table Card -->
+        <div class="card criteria-table-card mt-3">
+          <div class="card-header">
+            <div class="card-title-group">
+              <i data-lucide="list-ordered"></i>
+              <h3>Checklist Criteria (<span id="criteria-showing-count">100</span> Points)</h3>
+            </div>
+            <div class="header-toggles">
+              <button class="btn-link" id="btn-enable-all-criteria">Enable All</button>
+              <span class="divider">|</span>
+              <button class="btn-link" id="btn-disable-all-criteria">Disable All</button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="data-table" id="criteria-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">No.</th>
+                    <th style="width: 170px;">Category</th>
+                    <th>Question / Checklist Point</th>
+                    <th>Description / Audit Focus</th>
+                    <th style="width: 90px; text-align: center;">Active</th>
+                    <th style="width: 110px; text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="criteria-tbody">
+                  <!-- Dynamic Question Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. LIVE ANALYSIS & RESULTS TAB ================= -->
+      <section id="analysis-tab" class="tab-panel">
+        
+        <!-- State A: Analysis In Progress (Live Streaming HUD) -->
+        <div id="analysis-running-view" class="hidden">
+          <div class="analysis-hud-card">
+            <div class="hud-radar">
+              <div class="radar-circle circle-1"></div>
+              <div class="radar-circle circle-2"></div>
+              <div class="radar-circle circle-3"></div>
+              <div class="radar-center"><i data-lucide="bot"></i></div>
+            </div>
+            
+            <h2 class="hud-title">AI Tender Audit in Progress...</h2>
+            <p class="hud-subtitle" id="hud-status-message">Extracting text from tender PDF documents...</p>
+
+            <div class="hud-progress-wrapper">
+              <div class="hud-progress-bar-bg">
+                <div class="hud-progress-bar-fill" id="hud-progress-fill" style="width: 5%;"></div>
+              </div>
+              <div class="hud-progress-metrics">
+                <span id="hud-batch-status">Initializing Multi-Key Pool...</span>
+                <span class="hud-pct" id="hud-progress-pct">5%</span>
+              </div>
+            </div>
+
+            <div class="hud-live-batch-box">
+              <span class="badge-mini" id="hud-current-cat">General & Authority</span>
+              <p class="hud-current-q" id="hud-current-text">Analyzing tender clauses against active checklist criteria...</p>
+            </div>
+
+            <div class="hud-footer-note">
+              <i data-lucide="cpu"></i>
+              <span>Google Gemini 3.5 Multi-Key Parallel Engine &bull; Auto-Rotating Keys</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- State B: No Analysis Selected -->
+        <div id="analysis-idle-view" class="empty-state">
+          <div class="empty-icon"><i data-lucide="file-search"></i></div>
+          <h3>No Analysis Selected</h3>
+          <p>Go to the <strong>Tender Folders</strong> tab, open a tender folder with uploaded PDFs, and click "Analyze Tender Documents".</p>
+          <button class="btn btn-primary mt-3" id="btn-goto-folders">
+            <i data-lucide="folder-kanban"></i>
+            <span>Go to Tender Folders</span>
+          </button>
+        </div>
+
+        <!-- State C: Complete Results View -->
+        <div id="analysis-results-view" class="hidden">
+          <div class="results-header-bar">
+            <div>
+              <span class="breadcrumb-tag"><i data-lucide="folder"></i> <span id="res-folder-name">Tender Project</span></span>
+              <h1 class="page-title mt-1">Tender Audit Report & Compliance Matrix</h1>
+              <p class="page-subtitle">Audit completed on <span id="res-date">-</span> &bull; <span id="res-files-count">0</span> documents analyzed</p>
+            </div>
+            <div class="results-actions">
+              <button class="btn btn-secondary" id="btn-print-report" title="Print or Save as PDF">
+                <i data-lucide="printer"></i>
+                <span>Print / PDF</span>
+              </button>
+              <button class="btn btn-emerald pulse-glow" id="btn-export-excel">
+                <i data-lucide="sheet"></i>
+                <span>Export to Excel (.xlsx)</span>
+              </button>
+              <button class="btn btn-ghost" id="btn-rerun-analysis">
+                <i data-lucide="rotate-cw"></i>
+                <span>Re-Analyze</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Executive KPI Dashboard -->
+          <div class="kpi-grid mt-4">
+            
+            <!-- KPI 1: Accuracy / Completeness Radial Score -->
+            <div class="kpi-card kpi-accuracy">
+              <div class="kpi-radial-wrapper">
+                <svg class="radial-svg" viewBox="0 0 100 100">
+                  <circle class="radial-bg" cx="50" cy="50" r="42" />
+                  <circle class="radial-fill" id="res-radial-fill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="30" />
+                </svg>
+                <div class="radial-text">
+                  <span class="radial-number" id="res-accuracy-num">0%</span>
+                  <span class="radial-label">Completeness</span>
+                </div>
+              </div>
+              <div class="kpi-text-info">
+                <h4>AI Completeness Score</h4>
+                <p>Percentage of checklist points successfully identified in tender documents.</p>
+              </div>
+            </div>
+
+            <!-- KPI 2: Total Points Evaluated -->
+            <div class="kpi-card">
+              <div class="kpi-icon-box blue"><i data-lucide="list-checks"></i></div>
+              <div class="kpi-details">
+                <span class="kpi-val" id="res-total-points">100</span>
+                <span class="kpi-title">Total Points Checked</span>
+              </div>
+            </div>
+
+            <!-- KPI 3: Found / Answered Points -->
+            <div class="kpi-card">
+              <div class="kpi-icon-box emerald"><i data-lucide="check-circle-2"></i></div>
+              <div class="kpi-details">
+                <span class="kpi-val text-emerald" id="res-found-points">0</span>
+                <span class="kpi-title">Found in Tender</span>
+              </div>
+            </div>
+
+            <!-- KPI 4: Missing in Tender (-) -->
+            <div class="kpi-card">
+              <div class="kpi-icon-box red"><i data-lucide="minus-circle"></i></div>
+              <div class="kpi-details">
+                <span class="kpi-val text-red" id="res-missing-points">0</span>
+                <span class="kpi-title">Missing / Not Found (<span class="dash-pill">-</span>)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section-wise Category Breakdown -->
+          <div class="card category-breakdown-card mt-3">
+            <div class="card-header">
+              <div class="card-title-group">
+                <i data-lucide="bar-chart-3"></i>
+                <h3>Category Compliance & Finding Breakdown</h3>
+              </div>
+              <span class="text-sm text-muted">Section-wise points found vs missing</span>
+            </div>
+            <div class="card-body">
+              <div class="category-bars-grid" id="category-bars-container">
+                <!-- Dynamically generated category breakdown bars -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Table Filter & Search -->
+          <div class="results-toolbar mt-4">
+            <div class="status-filter-group">
+              <button class="filter-chip active" data-filter="all">All Points (<span id="filter-cnt-all">100</span>)</button>
+              <button class="filter-chip chip-found" data-filter="found">✓ Found (<span id="filter-cnt-found">0</span>)</button>
+              <button class="filter-chip chip-missing" data-filter="missing">- Missing in PDF (<span id="filter-cnt-missing">0</span>)</button>
+            </div>
+            <div class="results-search-box">
+              <i data-lucide="search"></i>
+              <input type="text" id="res-search-input" placeholder="Filter results, answers, clauses..." />
+            </div>
+          </div>
+
+          <!-- Results Data Table -->
+          <div class="card results-table-card mt-3">
+            <div class="table-responsive">
+              <table class="data-table results-table" id="results-data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">#</th>
+                    <th style="width: 170px;">Category</th>
+                    <th style="width: 320px;">Question / Checklist Criteria</th>
+                    <th>Extracted Tender Answer / Specification</th>
+                    <th style="width: 120px; text-align: center;">Status</th>
+                    <th style="width: 240px;">Source Document & Page / Clause</th>
+                  </tr>
+                </thead>
+                <tbody id="results-tbody">
+                  <!-- Dynamic result rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. HISTORY ARCHIVE TAB ================= -->
+      <section id="history-tab" class="tab-panel">
+        <div class="section-topbar">
+          <div>
+            <h1 class="page-title">Tender Analysis History & Archive</h1>
+            <p class="page-subtitle">Access all past tender audit runs, review previous answers, and re-download formatted Excel sheets.</p>
+          </div>
+          <div class="search-box-sm">
+            <i data-lucide="search"></i>
+            <input type="text" id="history-search-input" placeholder="Search past tenders..." />
+          </div>
+        </div>
+
+        <div id="history-container" class="history-grid mt-4">
+          <!-- Dynamic history cards -->
+        </div>
+
+        <div id="history-empty-state" class="empty-state hidden">
+          <div class="empty-icon"><i data-lucide="history"></i></div>
+          <h3>No Past Analyses Yet</h3>
+          <p>When you analyze tender folders, full reports with Excel exports will be saved here.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Modal 1: Create Tender Folder -->
+  <div id="modal-create-folder" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="folder-plus"></i>
+          <h3>Create Tender Folder</h3>
+        </div>
+        <button class="modal-close-btn" data-close="modal-create-folder"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-create-folder">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="folder-name-input">Tender / Project Folder Name <span class="required">*</span></label>
+            <input type="text" id="folder-name-input" placeholder="e.g., Tender-NHAI-Highway-EPC-2026" required />
+          </div>
+          <div class="form-group">
+            <label for="folder-desc-input">Description / Notes</label>
+            <textarea id="folder-desc-input" rows="2" placeholder="e.g., 4-Laning Highway Project from KM 102 to 148, EPC Mode"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-close="modal-create-folder">Cancel</button>
+          <button type="submit" id="btn-submit-create-folder" class="btn btn-primary"><i data-lucide="plus"></i> <span>Create Folder</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add Custom Criterion Point -->
+  <div id="modal-add-criterion" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="plus-circle"></i>
+          <h3 id="modal-criterion-title">Add Custom Checklist Point</h3>
+        </div>
+        <button class="modal-close-btn" data-close="modal-add-criterion"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-criterion">
+        <input type="hidden" id="edit-criterion-id" value="" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="crit-category-input">Category</label>
+            <select id="crit-category-input">
+              <option value="General & Authority">General & Authority</option>
+              <option value="Dates & Timelines">Dates & Timelines</option>
+              <option value="Fees & Guarantees">Fees & Guarantees</option>
+              <option value="Financial Eligibility">Financial Eligibility</option>
+              <option value="Technical Experience">Technical Experience</option>
+              <option value="Commercial & Payment">Commercial & Payment</option>
+              <option value="Penalties & Liabilities">Penalties & Liabilities</option>
+              <option value="Scope & Specifications">Scope & Specifications</option>
+              <option value="Legal & Compliance">Legal & Compliance</option>
+              <option value="Submission & Formats">Submission & Formats</option>
+              <option value="Custom Checklist">Custom Checklist</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="crit-question-input">Question / Checklist Criteria <span class="required">*</span></label>
+            <textarea id="crit-question-input" rows="2" placeholder="e.g., What is the minimum average turnover requirement for the last 3 financial years?" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="crit-desc-input">Description / Audit Notes (Optional)</label>
+            <textarea id="crit-desc-input" rows="2" placeholder="e.g., Checks audited balance sheet turnover thresholds and UDIN requirements."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-close="modal-add-criterion">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-criterion">Save Point</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Bulk Paste Import Criteria -->
+  <div id="modal-bulk-import" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="file-input"></i>
+          <h3>Bulk Paste Checklist Questions</h3>
+        </div>
+        <button class="modal-close-btn" data-close="modal-bulk-import"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-bulk-import">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="bulk-category-input">Assign Category for Imported Questions</label>
+            <input type="text" id="bulk-category-input" value="Custom Checklist" />
+          </div>
+          <div class="form-group">
+            <label for="bulk-text-input">Paste Questions (One question per line) <span class="required">*</span></label>
+            <textarea id="bulk-text-input" rows="8" placeholder="What is the EMD amount?&#10;What is the completion period?&#10;What is the penalty per week of delay?&#10;Are MSME exemptions provided?" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-close="modal-bulk-import">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i data-lucide="plus-circle"></i> Import All Points</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: API Keys & Settings -->
+  <div id="modal-settings" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="key-round"></i>
+          <h3>Google Gemini AI Studio Keys Pool</h3>
+        </div>
+        <button class="modal-close-btn" data-close="modal-settings"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-sm text-muted mb-3">The system automatically rotates between active keys in round-robin fashion. If any key reaches rate limit, it falls back instantly to the next key.</p>
+        
+        <div id="keys-list-container" class="keys-status-list mb-3">
+          <!-- Dynamic key pills -->
+        </div>
+
+        <div class="form-group">
+          <label for="settings-keys-input">Update API Keys (Comma separated)</label>
+          <textarea id="settings-keys-input" rows="3" placeholder="Key1, Key2, Key3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-close="modal-settings">Close</button>
+        <button type="button" class="btn btn-primary" id="btn-save-keys">Save Keys</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: File Size Limit Exceeded (60 MB) Popup -->
+  <div id="modal-filesize-error" class="modal-backdrop hidden">
+    <div class="modal-card" style="border-color: rgba(239, 68, 68, 0.4); max-width: 500px;">
+      <div class="modal-header" style="background: rgba(239, 68, 68, 0.1);">
+        <div class="modal-title-group">
+          <i data-lucide="alert-triangle" style="color:#EF4444; width:22px; height:22px;"></i>
+          <h3 style="color:#EF4444;">File Size Limit Exceeded (60 MB)</h3>
+        </div>
+        <button class="modal-close-btn" data-close="modal-filesize-error"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px; color:var(--text-main); margin-bottom: 12px;">
+          The following file(s) exceed the maximum permitted upload limit of <strong>60 MB</strong>:
+        </p>
+        <div id="oversized-files-list" style="background:var(--bg-input); border:1px solid rgba(239,68,68,0.25); border-radius:var(--radius-md); padding:12px 14px; display:flex; flex-direction:column; gap:8px;">
+          <!-- Dynamically populated list of oversized files -->
+        </div>
+        <p style="font-size:12px; color:var(--text-secondary); margin-top: 14px; line-height:1.4;">
+          <i data-lucide="info" style="width:14px; height:14px; display:inline-block; vertical-align:middle; color:var(--cyan);"></i>
+          Please compress your PDF documents or upload files under 60 MB for optimal processing.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-close="modal-filesize-error" style="background:#EF4444;">
+          <span>Understood, I'll Select Smaller Files</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
